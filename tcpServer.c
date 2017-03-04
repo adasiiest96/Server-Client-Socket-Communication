@@ -10,7 +10,7 @@ int main(int argc,char *argv[]){
     char server_message[256] = "You are now connected to the server";
     // create a socket descriptor
     char server_response[256];
-    int socketfd,client; 
+    int socketfd,client[5]; 
     int portno;
     if(argc < 2){
         perror("Not enough arguments");
@@ -39,21 +39,21 @@ int main(int argc,char *argv[]){
     listen(socketfd,5);
     
     //create a client socket address and accept connection
-    struct sockaddr_in client_address;
-    int cli_add_len = sizeof(client_address);
-    client = accept(socketfd,(struct sockaddr *)&client_address,&cli_add_len);
-    
+    int i=0;
+    struct sockaddr_in client_address[2];
+    int cli_add_len = sizeof(client_address[0]);
+    client[i] = accept(socketfd,(struct sockaddr *)&client_address[i],&cli_add_len);
     //send the message
-    send(client,server_message,sizeof(server_message),0);
+    send(client[i],server_message,sizeof(server_message),0);
     
     //receiving client message
     bzero(server_response,256);
-    recv(client,&server_response,sizeof(server_response),0);
+    recv(client[i],&server_response,sizeof(server_response),0);
     printf("The Client sent the data:%s\n",server_response);
 
     bzero(server_response,256);
     char server_ackg[256] = "Got your message!";
-    send(client,server_ackg,sizeof(server_ackg),0);
-    
+    send(client[i],server_ackg,sizeof(server_ackg),0);
+    i++;
     return 0;
 }
