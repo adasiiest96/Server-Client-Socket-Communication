@@ -1,7 +1,9 @@
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sqlite3.h> 
-
+ #include <string>
+using namespace std;
+#include <sqlite3.h>
 static int callback(void *NotUsed, int argc, char **argv, char **azColName){
    int i;
    for(i=0; i<argc; i++){
@@ -13,11 +15,29 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName){
 
 int main(int argc, char* argv[])
 {
-   sqlite3 *db;
-   char *zErrMsg = 0;
-   int rc;
-   char *sql;
-
+    sqlite3 *db;
+    char *zErrMsg = 0;
+    int rc;
+    string name;
+    string deli =", " ;
+    string finish = " );";
+    printf("enter a name?");
+    cin >> name;
+    int id = 01;
+    string mesg = "None";
+    mesg = "'" + mesg + "'";
+    int status = 0;
+    string sql1= "Insert into CHAT (ID,USERNAME,MESSAGE,STATUS) VALUES (";
+    name  = "'" + name + "'";
+    sql1  = sql1 + to_string(id) +deli +  name +deli +  mesg + deli + to_string(status) + finish;
+    char *sql;
+    sql = (char *)malloc(sql1.size() * sizeof(char));
+    int i=0;
+    for(i =0;i<sql1.size();i++){
+          sql[i] = sql1[i];
+    }
+    sql[i]  = '\0';
+    cout << sql;
    /* Open database */
    rc = sqlite3_open("test.db", &db);
    if( rc ){
@@ -38,9 +58,9 @@ int main(int argc, char* argv[])
          "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY)" \
          "VALUES (4, 'Mark', 25, 'Rich-Mond ', 65000.00 );";
     */
-   sql  = "select * from COMPANY;";
+   //sql  = "select * from COMPANY;";
    /* Execute SQL statement */
-   rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+   rc = sqlite3_exec(db,sql, callback, 0, &zErrMsg);
    if( rc != SQLITE_OK ){
       fprintf(stderr, "SQL error: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
