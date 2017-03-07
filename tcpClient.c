@@ -8,7 +8,7 @@
 #include <netdb.h>
 
 void generate(char *buffer){
-    printf("Please enter the message: ");
+    //printf("Please enter the message: ");
     bzero(buffer,256);
     fgets(buffer,255,stdin);
 }
@@ -64,12 +64,6 @@ int main(int argc, char *argv[]){
                 flag = 1;
             }
             bzero(server_response,256);
-        
-            //receive server response
-            recv(socketfd,&server_response,sizeof(server_response),0);
-            
-            //Printing out server response
-            printf("The server sent the data:%s\n",server_response);
             if(flag == 1){
                 return 0;
             }
