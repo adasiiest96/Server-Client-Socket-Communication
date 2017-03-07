@@ -14,7 +14,9 @@ void generate(char *buffer){
 int main(int argc, char *argv[]){
     int socketfd; // create a socket descriptor
     int portno;
+    int flag =0;
     char server_response[256];
+    char end[4] = "END";
     if(argc < 2){
         perror("Not enough arguments");
         printf("Usage:./tcpClient <IP_address of Server> <port number>\n");
@@ -35,21 +37,27 @@ int main(int argc, char *argv[]){
         printf("There is an error in connection\n");
         exit(1);
     }//socket has been connected to the server & ready for send/recv
-    
+    printf("Connected With server\n");
     bzero(server_response,256);
     recv(socketfd,&server_response,sizeof(server_response),0);
     printf("%s\n",server_response);
+    printf("hi\n");
+    while(1){
+        //Generate data to send the server
+        generate(server_response);
+        send(socketfd,server_response,sizeof(server_response),0);
+        if(strcmp(server_response,end) ==0){
+            flag = 1;
+        }
+        bzero(server_response,256);
     
-    //Generate data to send the server
-    generate(server_response);
-    send(socketfd,server_response,sizeof(server_response),0);
-    bzero(server_response,256);
-   
-    //receive server response
-    recv(socketfd,&server_response,sizeof(server_response),0);
-    
-    //Printing out server response
-    printf("The server sent the data:%s\n",server_response);
-    
-    return 0;
+        //receive server response
+        recv(socketfd,&server_response,sizeof(server_response),0);
+        
+        //Printing out server response
+        printf("The server sent the data:%s\n",server_response);
+        if(flag == 1){
+            return 0;
+        }
+        }
 }

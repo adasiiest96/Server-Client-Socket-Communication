@@ -8,9 +8,9 @@
 
 int main(int argc,char *argv[]){
     char server_message[256] = "You are now connected to the server";
-    // create a socket descriptor
+    char end[4] = "END";
     char server_response[256];
-    int socketfd,client; 
+    int socketfd,client;    // create a socket descriptor
     int portno;
     if(argc < 2){
         perror("Not enough arguments");
@@ -45,15 +45,18 @@ int main(int argc,char *argv[]){
     
     //send the message
     send(client,server_message,sizeof(server_message),0);
-    
+    while(1){
     //receiving client message
     bzero(server_response,256);
     recv(client,&server_response,sizeof(server_response),0);
     printf("The Client sent the data:%s\n",server_response);
-
+    if(strcmp(server_response,end)==0){
+        return 0;
+    }
     bzero(server_response,256);
     char server_ackg[256] = "Got your message!";
     send(client,server_ackg,sizeof(server_ackg),0);
+    }
     
     return 0;
 }
