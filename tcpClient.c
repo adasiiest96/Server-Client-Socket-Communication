@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -37,27 +38,41 @@ int main(int argc, char *argv[]){
         printf("There is an error in connection\n");
         exit(1);
     }//socket has been connected to the server & ready for send/recv
-    printf("Connected With server\n");
+
     bzero(server_response,256);
     recv(socketfd,&server_response,sizeof(server_response),0);
     printf("%s\n",server_response);
-    printf("hi\n");
-    while(1){
-        //Generate data to send the server
-        generate(server_response);
-        send(socketfd,server_response,sizeof(server_response),0);
-        if(strcmp(server_response,end) ==0){
-            flag = 1;
+    int pid = fork();
+    if(pid < 0 ){
+        perror("fork error\n");
+        exit(1);
+    }
+    else if(pid == 0){
+        while(1){
+            //printf("In child\n");
+            recv(socketfd,&server_response,sizeof(server_response),0);
+            printf("The server sent the data:%s\n",server_response);
+            bzero(server_response,256);
         }
-        bzero(server_response,256);
-    
-        //receive server response
-        recv(socketfd,&server_response,sizeof(server_response),0);
+    }
+    else{
+        while(1){
+            //Generate data to send the server
+            generate(server_response);
+            send(socketfd,server_response,sizeof(server_response),0);
+            if(strcmp(server_response,end) ==0){
+                flag = 1;
+            }
+            bzero(server_response,256);
         
-        //Printing out server response
-        printf("The server sent the data:%s\n",server_response);
-        if(flag == 1){
-            return 0;
-        }
-        }
+            //receive server response
+            recv(socketfd,&server_response,sizeof(server_response),0);
+            
+            //Printing out server response
+            printf("The server sent the data:%s\n",server_response);
+            if(flag == 1){
+                return 0;
+            }
+            }
+    }
 }
