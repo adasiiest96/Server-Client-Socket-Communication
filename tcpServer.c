@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 
+void createChat(int); // function to data transfer with client
+
 int main(int argc,char *argv[]){
-    char server_message[256] = "You are now connected to the server";
     // create a socket descriptor
-    char server_response[256];
     int socketfd,client; 
     int portno;
     if(argc < 2){
@@ -39,21 +40,53 @@ int main(int argc,char *argv[]){
     listen(socketfd,5);
     
     //create a client socket address and accept connection
-    struct sockaddr_in client_address;
-    int cli_add_len = sizeof(client_address);
-    client = accept(socketfd,(struct sockaddr *)&client_address,&cli_add_len);
+    int i=0;
+    int pid;
+    struct sockaddr_in client_address[20];
+    int cli_add_len = sizeof(client_address[0]);
+    while(1){
+        client = accept(socketfd,(struct sockaddr *)&client_address,&cli_add_len);
+        if(client < 0){
+            perror("Error on accept\n");
+            break;
+        }
+        pid = fork();
+        if (pid < 0 ){
+            perror("Fork Error\n");
+            exit(1);
+        }
+
+        else if(pid ==0){   // child process
+            close(socketfd);
+            createChat(client);
+            exit(0);
+        }
+        else{
+            close(client);
+        }
+        
+    }
     
+    return 0;
+}
+
+void createChat(int client){
+    char server_message[256] = "You are now connected to the server";
+    char server_ackg[256] = "Got your message!";
+    char server_response[256];
+
     //send the message
+
     send(client,server_message,sizeof(server_message),0);
-    
+
     //receiving client message
     bzero(server_response,256);
     recv(client,&server_response,sizeof(server_response),0);
     printf("The Client sent the data:%s\n",server_response);
-
     bzero(server_response,256);
-    char server_ackg[256] = "Got your message!";
+
+    //sending acknowledge to client
+
     send(client,server_ackg,sizeof(server_ackg),0);
     
-    return 0;
 }
